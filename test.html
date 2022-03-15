@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html style="height:100%; margin:0; padding:0">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<title>Clock</title>
+		<style type="text/css">
+			/* Customizable font and colors */
+			html {
+				background: #000000;
+				font-family: sans-serif;
+				font-weight: bold;
+				color: #FFFFFF;
+			}
+			.live {
+				font-weight: bold;
+				font-size: 70px;
+				color: yellow;
+			}
+			.message {
+				font-weight: bold;
+				font-size: 70px;
+				color: yellow;
+			}
+			.box {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				width: 100%;
+				height: 100%;
+				padding-top: 100px;				
+			}
+			
+
+		</style>
+	</head>
+	
+	<body>
+		<div class="box">
+		
+		<!-- <span id="livetext" class="live" style="font-kerning:none">LIVE</span> -->
+		<span id="clocktext" style="font-kerning:none"></span> 
+		<span id="messagetext" class="message" style="font-kerning:none"></span>		
+		</div>
+		
+		
+		
+		<script>
+			"use strict";
+			
+			var textElem = document.getElementById("clocktext");
+			var targetWidth = 0.9;  // Proportion of full screen width
+			var curFontSize = 20;  // Do not change
+
+			const messageText = document.querySelector('.message');
+			
+			function updateClock() {
+				var d = new Date();
+				var s = "";
+				s += (10 > d.getHours  () ? "0" : "") + d.getHours  () + ":";
+				s += (10 > d.getMinutes() ? "0" : "") + d.getMinutes() + ":";
+				s += (10 > d.getSeconds() ? "0" : "") + d.getSeconds();
+				textElem.textContent = s;
+				setTimeout(updateClock, 1000 - d.getTime() % 1000 + 20);
+			}
+
+			async function getMessage() {
+				const response = await fetch('http://localhost:4000/api');
+  				const viesti = await response.json();
+
+				let msg = viesti.pop().name;
+				
+				
+				messageText.textContent = msg;
+				setTimeout(getMessage,2000);			 
+				
+			}
+
+			
+			
+			function updateTextSize() {
+				for (var i = 0; 3 > i; i++) {  // Iterate for better better convergence
+					curFontSize *= targetWidth / (textElem.offsetWidth / textElem.parentNode.offsetWidth);
+					textElem.style.fontSize = curFontSize + "pt";
+				}
+			}
+			
+			getMessage()
+			updateClock();
+			updateTextSize();
+			window.addEventListener("resize", updateTextSize);
+		</script>
+	</body>
